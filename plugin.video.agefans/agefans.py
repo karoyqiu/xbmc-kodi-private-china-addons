@@ -12,19 +12,21 @@ class Agefans(object):
         self.__cache = plugin.get_storage('cache')
 
 
-    def get_rank(self, show_detail):
-        j = self.__get('/rank')
+    def get_rank(self, page, show_detail):
+        j = self.__get('/rank?page={0}'.format(page + 1))
         pre = j['AniRankPre']
         items = []
+        lastNo = 0
 
         for ani in pre:
+            lastNo = ani['NO']
             item = {}
-            item['label'] = ani['Title']
+            item['label'] = u'{0}. {1}'.format(lastNo, ani['Title'])
             item['path'] = self.__plugin.url_for(show_detail, aid=ani['AID'])
             item['thumbnail'] = ani['PicSmall']
             items.append(item)
 
-        return items
+        return items, j['AllCnt'] > lastNo
 
 
     def get_detail(self, aid, show_playlist):
