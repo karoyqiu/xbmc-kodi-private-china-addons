@@ -21,6 +21,7 @@ class Agefans(object):
             item = {}
             item['label'] = ani['Title']
             item['path'] = self.__plugin.url_for(show_detail, aid=ani['AID'])
+            item['thumbnail'] = ani['PicSmall']
             items.append(item)
 
         return items
