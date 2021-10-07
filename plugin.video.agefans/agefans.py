@@ -21,13 +21,27 @@ class Agefans(object):
         for ani in pre:
             lastNo = ani['NO']
             item = {}
-            item['label'] = u'{0}. {1}'.format(lastNo, ani['Title'])
+            item['label'] = ani['Title']
             item['path'] = self.__plugin.url_for(show_detail, aid=ani['AID'])
             item['thumbnail'] = ani['PicSmall']
             items.append(item)
 
         return items, j['AllCnt'] > lastNo
 
+
+    def search(self, keyword, page, show_detail):
+        j = self.__get('/search?page={0}&query={1}'.format(page + 1, keyword))
+        pre = j['AniPreL']
+        items = []
+
+        for ani in pre:
+            item = {}
+            item['label'] = ani[u'R动画名称']
+            item['path'] = self.__plugin.url_for(show_detail, aid=ani['AID'])
+            item['thumbnail'] = ani[u'R封面图小']
+            items.append(item)
+
+        return items, j['SeaCnt'] > (page + 1) * 24
 
     def get_detail(self, aid, show_playlist):
         j = self.__get('/detail/' + aid)

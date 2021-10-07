@@ -13,7 +13,11 @@ def index():
         {
             'label': u'排行榜',
             'path': plugin.url_for('show_rank', page='0'),
-        }
+        },
+        {
+            'label': u'搜索',
+            'path': plugin.url_for('search', keyword='null', page='0'),
+        },
     ]
 
     return items
@@ -24,7 +28,7 @@ def show_rank(page='0'):
     page = int(page)
     agefans = Agefans(plugin)
     items, more = agefans.get_rank(page, 'show_detail')
-    
+
     if page > 0:
         items.insert(0, {
             'label': u'<< 上一页',
@@ -35,6 +39,38 @@ def show_rank(page='0'):
         items.append({
             'label': u'下一页 >>',
             'path': plugin.url_for('show_rank', page=str(page + 1))
+        })
+
+    return plugin.finish(items, update_listing=True)
+
+
+@plugin.route('/search/<keyword>/<page>/')
+def search(keyword, page='0'):
+    if keyword == 'null':
+        keyboard = xbmc.Keyboard('', '请输入搜索内容')
+        xbmc.sleep(1500)
+        keyboard.doModal()
+
+        if (keyboard.isConfirmed()):
+            keyword = keyboard.getText()
+
+    if keyword == 'null':
+        return []
+
+    page = int(page)
+    agefans = Agefans(plugin)
+    items, more = agefans.search(keyword, page, 'show_detail')
+
+    if page > 0:
+        items.insert(0, {
+            'label': u'<< 上一页',
+            'path': plugin.url_for('search', keyword=keyword, page=str(page - 1))
+        })
+
+    if more:
+        items.append({
+            'label': u'下一页 >>',
+            'path': plugin.url_for('search', keyword=keyword, page=str(page + 1))
         })
 
     return plugin.finish(items, update_listing=True)
