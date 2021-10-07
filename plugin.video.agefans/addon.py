@@ -7,12 +7,32 @@ from agefans import Agefans
 plugin = Plugin()
 
 
+def add_page_ctrl(items, page, more, func):
+    if page > 0:
+        items.insert(0, {
+            'label': u'<< 上一页',
+            'path': plugin.url_for(func, page=str(page - 1))
+        })
+
+    if more:
+        items.append({
+            'label': u'下一页 >>',
+            'path': plugin.url_for(func, page=str(page + 1))
+        })
+
+    return items
+
+
 @plugin.route('/')
 def index():
     items = [
         {
             'label': u'排行榜',
             'path': plugin.url_for('show_rank', page='0'),
+        },
+        {
+            'label': u'推荐',
+            'path': plugin.url_for('show_recommend', page='0'),
         },
         {
             'label': u'搜索',
@@ -23,24 +43,21 @@ def index():
     return items
 
 
-@plugin.cached_route('/rank/<page>/')
+@plugin.route('/rank/<page>/')
 def show_rank(page='0'):
     page = int(page)
     agefans = Agefans(plugin)
     items, more = agefans.get_rank(page, 'show_detail')
+    items = add_page_ctrl(items, page, more, 'show_rank')
+    return plugin.finish(items, update_listing=True)
 
-    if page > 0:
-        items.insert(0, {
-            'label': u'<< 上一页',
-            'path': plugin.url_for('show_rank', page=str(page - 1))
-        })
 
-    if more:
-        items.append({
-            'label': u'下一页 >>',
-            'path': plugin.url_for('show_rank', page=str(page + 1))
-        })
-
+@plugin.route('/recommend/<page>/')
+def show_recommend(page='0'):
+    page = int(page)
+    agefans = Agefans(plugin)
+    items, more = agefans.get_recommend(page, 'show_detail')
+    items = add_page_ctrl(items, page, more, 'show_recommend')
     return plugin.finish(items, update_listing=True)
 
 

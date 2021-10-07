@@ -15,18 +15,17 @@ class Agefans(object):
     def get_rank(self, page, show_detail):
         j = self.__get('/rank?page={0}'.format(page + 1))
         pre = j['AniRankPre']
-        items = []
-        lastNo = 0
-
-        for ani in pre:
-            lastNo = ani['NO']
-            item = {}
-            item['label'] = ani['Title']
-            item['path'] = self.__plugin.url_for(show_detail, aid=ani['AID'])
-            item['thumbnail'] = ani['PicSmall']
-            items.append(item)
-
+        items = [self.__pre_to_item(item, show_detail) for item in pre]
+        lastNo = pre[len(pre) - 1]['NO']
         return items, j['AllCnt'] > lastNo
+
+
+    def get_recommend(self, page, show_detail):
+        page += 1
+        j = self.__get('/recommend?page={0}&size=30'.format(page))
+        pre = j['AniPre']
+        items = [self.__pre_to_item(item, show_detail) for item in pre]
+        return items, j['AllCnt'] > page * 30
 
 
     def search(self, keyword, page, show_detail):
@@ -83,3 +82,17 @@ class Agefans(object):
     def __get(self, url):
         r = requests.get(self.__baseurl + url)
         return json.loads(r.text)
+
+
+    def __pre_to_item(self, pre, show_detail):
+        thumb = pre['PicSmall']
+
+        if thumb.startswith('//'):
+            thumb = 'https:' + thumb
+
+        item = {}
+        item['label'] = pre['Title']
+        item['path'] = self.__plugin.url_for(show_detail, aid=pre['AID'])
+        item['thumbnail'] = thumb
+
+        return item
