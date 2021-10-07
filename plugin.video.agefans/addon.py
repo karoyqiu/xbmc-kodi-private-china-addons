@@ -19,7 +19,7 @@ def index():
     return items
 
 
-@plugin.route('/rank/<page>')
+@plugin.cached_route('/rank/<page>/')
 def show_rank(page='0'):
     page = int(page)
     agefans = Agefans(plugin)
@@ -40,13 +40,13 @@ def show_rank(page='0'):
     return plugin.finish(items, update_listing=True)
 
 
-@plugin.cached_route('/detail/<aid>')
+@plugin.cached_route('/detail/<aid>/')
 def show_detail(aid):
     agefans = Agefans(plugin)
     return agefans.get_detail(aid, 'show_playlist')
 
 
-@plugin.route('/playlist/<aid>/<index>')
+@plugin.cached_route('/playlist/<aid>/<index>/')
 def show_playlist(aid, index):
     index = int(index)
     agefans = Agefans(plugin)
@@ -54,4 +54,5 @@ def show_playlist(aid, index):
 
 
 if __name__ == '__main__':
+    print str(sys.argv)
     plugin.run()
